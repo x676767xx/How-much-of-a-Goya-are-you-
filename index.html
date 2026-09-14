@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Much of a Goyah Are You?</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at top, #242424 0%, #0d0d0d 45%, #050505 100%);
+        color: #f4f4f4;
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 25px;
+    }
+
+    .quiz {
+        width: 100%;
+        max-width: 720px;
+        background: rgba(20,20,20,0.96);
+        border: 1px solid #333;
+        border-radius: 22px;
+        padding: 35px;
+        box-shadow: 0 25px 80px rgba(0,0,0,0.7);
+    }
+
+    h1 {
+        font-size: clamp(2rem, 7vw, 4rem);
+        line-height: 0.95;
+        margin: 0 0 15px;
+        letter-spacing: -3px;
+    }
+
+    .subtitle {
+        color: #aaa;
+        margin-bottom: 30px;
+        line-height: 1.5;
+    }
+
+    .progress {
+        height: 6px;
+        background: #292929;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 30px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: #eee;
+        transition: width .3s ease;
+    }
+
+    .question-number {
+        color: #777;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 2px;
+        margin-bottom: 10px;
+    }
+
+    .question {
+        font-size: 1.55rem;
+        line-height: 1.3;
+        margin-bottom: 25px;
+    }
+
+    .answers {
+        display: grid;
+        gap: 12px;
+    }
+
+    button {
+        border: 1px solid #3a3a3a;
+        background: #171717;
+        color: #eee;
+        padding: 16px 18px;
+        border-radius: 13px;
+        text-align: left;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+
+    button:hover {
+        background: #292929;
+        border-color: #777;
+        transform: translateY(-2px);
+    }
+
+    .start,
+    .restart {
+        background: #f1f1f1;
+        color: #080808;
+        text-align: center;
+        font-weight: bold;
+        border: none;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .start:hover,
+    .restart:hover {
+        background: white;
+    }
+
+    .result {
+        display: none;
+        text-align: center;
+    }
+
+    .percentage {
+        font-size: 5rem;
+        font-weight: 900;
+        letter-spacing: -5px;
+        margin: 20px 0;
+    }
+
+    .result-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+    }
+
+    .result-text {
+        color: #aaa;
+        line-height: 1.6;
+        margin-bottom: 25px;
+    }
+
+    .warning {
+        font-size: .75rem;
+        color: #555;
+        text-align: center;
+        margin-top: 25px;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="quiz">
+
+    <!-- INTRO -->
+    <div id="intro">
+        <h1>How Much of a Goyah Are You?</h1>
+
+        <p class="subtitle">
+            A completely unscientific investigation into how aggressively
+            non-Jewish you are. No rabbis were consulted. Your family may
+            be disappointed.
+        </p>
+
+        <button class="start" onclick="startQuiz()">
+            BEGIN THE INVESTIGATION
+        </button>
+
+        <p class="warning">
+            Results are legally meaningless and spiritually questionable.
+        </p>
+    </div>
+
+    <!-- QUIZ -->
+    <div id="quizArea" class="hidden">
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="question-number" id="questionNumber"></div>
+        <div class="question" id="question"></div>
+
+        <div class="answers" id="answers"></div>
+
+    </div>
+
+    <!-- RESULT -->
+    <div id="result" class="result">
+
+        <div class="question-number">THE VERDICT</div>
+
+        <div class="percentage" id="percentage"></div>
+
+        <div class="result-title" id="resultTitle"></div>
+
+        <p class="result-text" id="resultText"></p>
+
+        <button class="restart" onclick="restartQuiz()">
+            I REFUSE TO ACCEPT THIS VERDICT
+        </button>
+
+    </div>
+
+</div>
+
+<script>
+
+const questions = [
+
+    {
+        q: "Someone says “mazel tov.” You respond:",
+        a: [
+            ["“Mazel tov!” Obviously.", 0],
+            ["Smile confidently while having absolutely no idea what is happening.", 2],
+            ["“Thanks, you too.”", 4],
+            ["Ask whether it's a type of pasta.", 5]
+        ]
+    },
+
+    {
+        q: "How many Jewish holidays could you name without opening Google?",
+        a: [
+            ["Basically all of them.", 0],
+            ["A respectable number.", 1],
+            ["Two. And one is probably spelled wrong.", 3],
+            ["Christmas.", 5]
+        ]
+    },
+
+    {
+        q: "You hear the word “kosher.” Your brain immediately thinks:",
+        a: [
+            ["Dietary laws.", 0],
+            ["Jewish food rules.", 1],
+            ["Something involving pickles.", 3],
+            ["A suspiciously expensive supermarket label.", 5]
+        ]
+    },
+
+    {
+        q: "Your Friday night usually looks like:",
+        a: [
+            ["Shabbat dinner.", 0],
+            ["Dinner with family.", 1],
+            ["Going out.", 3],
+            ["Scrolling TikTok until my frontal lobe gives up.", 5]
+        ]
+    },
+
+    {
+        q: "Someone starts discussing Jewish genealogy. You:",
+        a: [
+            ["Actually know your family history.", 0],
+            ["Know approximately where your grandparents came from.", 1],
+            ["Know your grandmother's maiden name and that's about it.", 3],
+            ["My family tree is basically a mystery novel.", 5]
+        ]
+    },
+
+    {
+        q: "A Jewish friend mentions a food you've never heard of. You:",
+        a: [
+            ["Know exactly what they mean.", 0],
+            ["Ask for clarification.", 1],
+            ["Pretend you know what it is.", 3],
+            ["Assume it's either bread, potatoes or something pickled.", 5]
+        ]
+    },
+
+    {
+        q: "Your knowledge of Judaism mostly comes from:",
+        a: [
+            ["Actual studying.", 0],
+            ["Jewish friends and conversations.", 1],
+            ["Random things I've encountered online.", 3],
+            ["TV shows and vibes.", 5]
+        ]
+    },
+
+    {
+        q: "Someone says “oy vey.” You:",
+        a: [
+            ["Understand the emotional weight immediately.", 0],
+            ["Know roughly what it means.", 1],
+            ["Recognise the phrase but couldn't explain it.", 3],
+            ["Think they're casting a spell.", 5]
+        ]
+    },
+
+    {
+        q: "How confident are you ordering Jewish food?",
+        a: [
+            ["Extremely.", 0],
+            ["Pretty confident.", 1],
+            ["I'll just point at something.", 3],
+            ["I'll have chicken nuggets.", 5]
+        ]
+    },
+
+    {
+        q: "At a Jewish family gathering, you are most likely to:",
+        a: [
+            ["Know half the people already.", 0],
+            ["Know enough to survive.", 1],
+            ["Ask approximately 900 questions.", 3],
+            ["Become the subject of an anthropological study.", 5]
+        ]
+    },
+
+    {
+        q: "Someone asks whether you're Jewish. You say:",
+        a: [
+            ["Yes.", 0],
+            ["No, but I know a lot about Judaism.", 1],
+            ["No, why?", 3],
+            ["“Does my inability to pronounce anything correctly answer that?”", 5]
+        ]
+    },
+
+    {
+        q: "Your relationship with pickles is:",
+        a: [
+            ["Deeply serious.", 0],
+            ["I like them.", 1],
+            ["They're acceptable.", 3],
+            ["Why is the cucumber angry?", 5]
+        ]
+    },
+
+    {
+        q: "How often do you accidentally pronounce Hebrew words like you're summoning something?",
+        a: [
+            ["Never.", 0],
+            ["Occasionally.", 1],
+            ["Frequently.", 3],
+            ["The spirits have started answering.", 5]
+        ]
+    },
+
+    {
+        q: "A Jewish friend invites you to dinner. Your first thought:",
+        a: [
+            ["Wonderful.", 0],
+            ["What should I bring?", 1],
+            ["What are the rules?", 3],
+            ["Please tell me there isn't going to be an oral exam.", 5]
+        ]
+    },
+
+    {
+        q: "Final question: how non-Jewish are you feeling right now?",
+        a: [
+            ["Not particularly.", 0],
+            ["A little.", 1],
+            ["Quite a lot.", 3],
+            ["I have reached unprecedented levels of goyah.", 5]
+        ]
+    }
+
+];
+
+let currentQuestion = 0;
+let score = 0;
+
+function startQuiz() {
+    document.getElementById("intro").classList.add("hidden");
+    document.getElementById("quizArea").classList.remove("hidden");
+    showQuestion();
+}
+
+function showQuestion() {
+
+    const q = questions[currentQuestion];
+
+    document.getElementById("questionNumber").textContent =
+        `Question ${currentQuestion + 1} / ${questions.length}`;
+
+    document.getElementById("question").textContent = q.q;
+
+    document.getElementById("progressBar").style.width =
+        `${(currentQuestion / questions.length) * 100}%`;
+
+    const answers = document.getElementById("answers");
+    answers.innerHTML = "";
+
+    q.a.forEach(answer => {
+
+        const button = document.createElement("button");
+
+        button.textContent = answer[0];
+
+        button.onclick = () => {
+            score += answer[1];
+            nextQuestion();
+        };
+
+        answers.appendChild(button);
+    });
+}
+
+function nextQuestion() {
+
+    currentQuestion++;
+
+    if (currentQuestion >= questions.length) {
+        showResult();
+    } else {
+        showQuestion();
+    }
+}
+
+function showResult() {
+
+    document.getElementById("quizArea").classList.add("hidden");
+    document.getElementById("result").style.display = "block";
+
+    const maxScore = questions.length * 5;
+
+    const percentage = Math.round((score / maxScore) * 100);
+
+    document.getElementById("percentage").textContent =
+        percentage + "%";
+
+    let title;
+    let text;
+
+    if (percentage <= 15) {
+
+        title = "Goyah Allegations: DISMISSED";
+
+        text =
+        "Honestly? Suspicious. You know far too much. " +
+        "Either you've done your homework or you've been adopted by a Jewish family.";
+
+    } else if (percentage <= 35) {
+
+        title = "Honorary Goyah";
+
+        text =
+        "You're not completely clueless, but there's still a healthy " +
+        "amount of “wait, what does that mean?” happening behind your eyes.";
+
+    } else if (percentage <= 60) {
+
+        title = "Certified Goyah";
+
+        text =
+        "The evidence is overwhelming. You have entered the territory " +
+        "where someone says a Hebrew word and you immediately look for subtitles.";
+
+    } else if (percentage <= 80) {
+
+        title = "Advanced Goyah";
+
+        text =
+        "At this point you're not merely non-Jewish. You're professionally " +
+        "non-Jewish. Somewhere, a Jewish grandmother has sensed your confusion.";
+
+    } else {
+
+        title = "MAXIMUM GOYAH";
+
+        text =
+        "Congratulations. You have achieved levels of goyah previously " +
+        "thought impossible. Your Jewish friends may now use you as a control group.";
+
+    }
+
+    document.getElementById("resultTitle").textContent = title;
+    document.getElementById("resultText").textContent = text;
+}
+
+function restartQuiz() {
+
+    currentQuestion = 0;
+    score = 0;
+
+    document.getElementById("result").style.display = "none";
+    document.getElementById("quizArea").classList.remove("hidden");
+
+    showQuestion();
+}
+
+</script>
+
+</body>
+</html>
